@@ -1,0 +1,54 @@
+float player1Y;  
+float player2Y;
+float projectile1X;  
+float projectile1Y;  
+float projectile2X;  
+float projectile2Y; 
+int player1Health;  
+int player2Health;  
+
+
+void setup (){
+  size(800, 400);  
+  
+  player1Y = height / 2;
+  player2Y = height / 2;
+  projectile1X = -10;  
+  projectile1Y = -10;
+  projectile2X = width + 10;  
+  projectile2Y = -10;
+  
+  player1Health = 100; 
+  player2Health = 100;  
+}
+void draw (){
+  
+  fill(255, 0, 0); 
+  rect(50, player1Y - 50, 50, 100);
+  
+  fill(0, 0, 255);  
+  rect(width - 100, player2Y - 50, 50, 100);  
+  
+  fill(0);  
+  rect(projectile1X, projectile1Y, 10, 10); 
+  rect(projectile2X, projectile2Y, 10, 10); 
+  fill(0, 255, 0); 
+  rect(50, 30, player1Health, 10); 
+  rect(width - player2Health - 50, 30, player2Health, 10); 
+  
+  
+  
+  
+   if (keyPressed) {
+    if (key == 'w' || key == 'W') {
+      player1Y -= 5; 
+    } else if (key == 's' || key == 'S') {
+      player1Y += 5;
+    }
+    
+    if (keyCode == UP) {
+      player2Y -= 5; 
+    } else if (keyCode == DOWN) {
+      player2Y += 5;
+    }
+}
