@@ -1,54 +1,125 @@
-float player1Y;  
+float player1X;
+float player1Y;
+float player1Speed = 5;
+float player1YSpeed = 0;
+float player1Gravity = 0.5;
+boolean player1IsJumping = false;
+int player1Health = 100;
+
+
+float player2X;
 float player2Y;
-float projectile1X;  
-float projectile1Y;  
-float projectile2X;  
-float projectile2Y; 
-int player1Health;  
-int player2Health;  
+float player2Speed = 5;
+float player2YSpeed = 0;
+float player2Gravity = 0.5;
+boolean player2IsJumping = false;
+int player2Health = 100;
 
+float floorY;
 
-void setup (){
-  size(800, 400);  
+boolean[] keys = new boolean[120]; 
+
+void setup() {
+  size(800, 400);
   
+  player1X = 100;
   player1Y = height / 2;
+  player2X = width - 100;
   player2Y = height / 2;
-  projectile1X = -10;  
-  projectile1Y = -10;
-  projectile2X = width + 10;  
-  projectile2Y = -10;
   
-  player1Health = 100; 
-  player2Health = 100;  
+  floorY = height - 50;
 }
-void draw (){
+
+void draw() {
+  background(113, 188, 225);
+  fill(255, 255, 0);  
+  circle(50, 50, 50);
+  fill(255);
+  rect(0, floorY, width, height - floorY);
   
-  fill(255, 0, 0); 
-  rect(50, player1Y - 50, 50, 100);
-  
-  fill(0, 0, 255);  
-  rect(width - 100, player2Y - 50, 50, 100);  
-  
-  fill(0);  
-  rect(projectile1X, projectile1Y, 10, 10); 
-  rect(projectile2X, projectile2Y, 10, 10); 
-  fill(0, 255, 0); 
-  rect(50, 30, player1Health, 10); 
-  rect(width - player2Health - 50, 30, player2Health, 10); 
-  
+  fill(255);
+textSize(20);
+text("Player 1 Health: " + player1Health, 20, 30);
+fill(0, 255, 0);
+rect(10, 40, player1Health*2, 30, 28);
+
+fill(255);
+text("Player 2 Health: " + player2Health, width - 200, 30);
+fill(0, 255, 0);
+rect(width-200, 40, player2Health*2, 30, 28);
+
   
   
+  fill(255, 0, 0);
+  rect(player1X, player1Y, 50, 100);
+ 
   
-   if (keyPressed) {
-    if (key == 'w' || key == 'W') {
-      player1Y -= 5; 
-    } else if (key == 's' || key == 'S') {
-      player1Y += 5;
-    }
-    
-    if (keyCode == UP) {
-      player2Y -= 5; 
-    } else if (keyCode == DOWN) {
-      player2Y += 5;
-    }
+  fill(0, 0, 255);
+  rect(player2X, player2Y, 50, 100);
+  
+  
+  
+  
+  handlePlayer1Movement();
+  handlePlayer2Movement();
+  
+  player1Y += player1YSpeed;
+  player1YSpeed += player1Gravity;
+  
+  if (player1Y >= floorY - 100) {
+    player1Y = floorY - 100;
+    player1YSpeed = 0;
+    player1IsJumping = false;
+  }
+  
+  player2Y += player2YSpeed;
+  player2YSpeed += player2Gravity;
+  
+  if (player2Y >= floorY - 100) {
+    player2Y = floorY - 100;
+    player2YSpeed = 0;
+    player2IsJumping = false;
+  }
+}
+
+void handlePlayer1Movement() {
+  if (keys['W'] && !player1IsJumping) {
+    player1YSpeed = -10;
+    player1IsJumping = true;
+  } else if (keys['S']) {
+    player1Y += player1Speed;
+  }
+  
+  if (keys['D']) {
+    player1X += player1Speed;
+  }
+  
+  if (keys['A']) {
+    player1X -= player1Speed;
+  }
+}
+
+void handlePlayer2Movement() {
+  if (keys[UP] && !player2IsJumping) {
+    player2YSpeed = -10;
+    player2IsJumping = true;
+  } else if (keys[DOWN]) {
+    player2Y += player2Speed;
+  }
+  
+  if (keys[RIGHT]) {
+    player2X += player2Speed;
+  }
+  
+  if (keys[LEFT]) {
+    player2X -= player2Speed;
+  }
+}
+
+void keyPressed() {
+  keys[keyCode] = true;
+}
+
+void keyReleased() {
+  keys[keyCode] = false;
 }
