@@ -36,8 +36,16 @@ boolean gameOver = false;
 int lastPlayer1ShotTime = 0;
 int lastPlayer2ShotTime = 0;
 
+boolean gameStarted = false;
+PImage[] backgrounds = new PImage[5];
+int currentBackground = 0;
+
 void setup() {
   size(800, 400);
+
+  for (int i = 0; i < backgrounds.length; i++) {
+    backgrounds[i] = loadImage("background" + i + ".jpg");
+  }
 
   player1X = 100;
   player1Y = height / 2;
@@ -48,7 +56,12 @@ void setup() {
 }
 
 void draw() {
-  background(113, 188, 225);
+ if (!gameStarted) {
+    displayStartScreen();
+  } else {
+    background(backgrounds[currentBackground]);
+
+
   fill(255, 255, 0);
   circle(50, 50, 50);
   fill(255);
@@ -163,7 +176,7 @@ void draw() {
     text("Press 'R' to restart", width / 2, height / 2 + 50);
   }
 }
-
+}
 void handlePlayer1Movement() {
   if (keys['W'] && !player1IsJumping) {
     player1YSpeed = -10;
@@ -199,7 +212,11 @@ void handlePlayer2Movement() {
 }
 
 void keyPressed() {
-  keys[keyCode] = true;
+  if (keyCode == ENTER) {
+    gameStarted = true;
+  }
+
+
   if (keyCode == 'V') {
     if (!player1IsJumping) {
       isPlayer1Shooting = true;
@@ -210,11 +227,29 @@ void keyPressed() {
       isPlayer2Shooting = true;
     }
   }
-
+  if (!gameStarted && keyCode == 'B') {
+    switchBackground();
+  }
   if (gameOver && keyCode == 'R') {
     restartGame();
+    
   }
+    keys[keyCode] = true;
+
 }
+
+void displayStartScreen() {
+  background(backgrounds[currentBackground]);
+  textSize(30);
+  textAlign(CENTER, CENTER);
+  fill(255);
+  text("Press 'ENTER' to start", width / 2, height / 2);
+}
+
+void switchBackground() {
+  currentBackground = (currentBackground + 1) % backgrounds.length;
+}
+
 
 void keyReleased() {
   keys[keyCode] = false;
