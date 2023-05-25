@@ -1,0 +1,242 @@
+float player1X;
+float player1Y;
+float bulletSize = 10;
+float bulletSpeed = 5;
+float player1Speed = 5;
+float player1YSpeed = 0;
+float player1Gravity = 0.5;
+boolean player1IsJumping = false;
+int player1Health = 100;
+boolean canPlayer1Shoot = true;
+int player1ShootDelay = 700;
+
+float player2X;
+float player2Y;
+float player2Speed = 5;
+float player2YSpeed = 0;
+float player2Gravity = 0.5;
+boolean player2IsJumping = false;
+int player2Health = 100;
+boolean canPlayer2Shoot = true;
+int player2ShootDelay = 700;
+
+float floorY;
+
+boolean[] keys = new boolean[120];
+
+ArrayList<PVector> player1Bullets = new ArrayList<PVector>();
+ArrayList<PVector> player2Bullets = new ArrayList<PVector>();
+
+boolean isPlayer1Shooting = false;
+boolean isPlayer2Shooting = false;
+
+boolean gameOver = false;
+
+int lastPlayer1ShotTime = 0;
+int lastPlayer2ShotTime = 0;
+
+boolean gameStarted = false; 
+PImage[] backgrounds = new PImage[5]; 
+int currentBackground = 0; 
+
+void setup() {
+  size(800, 400);
+
+  for (int i = 0; i < backgrounds.length; i++) {
+    backgrounds[i] = loadImage("background" + i + ".jpg");
+  }
+
+  player1X = 100;
+  player1Y = height / 2;
+  player2X = width - 100;
+  player2Y = height / 2;
+
+  floorY = height - 50;
+}
+
+void draw() {
+  if (!gameStarted) {
+    displayStartScreen();
+  } else {
+    background(backgrounds[currentBackground]);
+
+    fill(255, 255, 0);
+    circle(50, 50, 50);
+    fill(255);
+    rect(0, floorY, width, height - floorY);
+
+    fill(255);
+    textSize(20);
+    text("Player 1 Health: " + player1Health, 20, 30);
+    fill(0, 255, 0);
+    rect(10, 40, max(player1Health, 0) * 2, 30, 28);
+
+    fill(255);
+    text("Player 2 Health: " + player2Health, width - 200, 30);
+    fill(0, 255, 0);
+    rect(width - 200, 40, max(player2Health, 0) * 2, 30, 28);
+
+    fill(255, 0, 0);
+    rect(player1X, player1Y, 50, 100);
+
+    fill(0, 0, 255);
+    rect(player2X, player2Y, 50, 100);
+
+    handlePlayer1Movement();
+    handlePlayer2Movement();
+
+    player1Y += player1YSpeed;
+    player1YSpeed += player1Gravity;
+
+    if (player1Y >= floorY - 100) {
+      player1Y = floorY - 100;
+      player1YSpeed = 0;
+      player1IsJumping = false;
+    }
+
+    player2Y += player2YSpeed;
+    player2YSpeed += player2Gravity;
+
+    if (player2Y >= floorY - 100) {
+      player2Y = floorY - 100;
+      player2YSpeed = 0;
+      player2IsJumping = false;
+    }
+
+    handlePlayer1Shooting();
+    handlePlayer2Shooting();
+
+    if (gameOver) {
+      textSize(40);
+      fill(255, 0, 0);
+      text("Game Over", width / 2, height / 2);
+      noLoop();
+    }
+  }
+}
+
+void displayStartScreen() {
+  background(backgrounds[currentBackground]);
+  textSize(30);
+  textAlign(CENTER, CENTER);
+  fill(255);
+  text("Press 'ENTER' to start", width / 2, height / 2);
+}
+
+void switchBackground() {
+  currentBackground = (currentBackground + 1) % backgrounds.length;
+}
+
+void keyPressed() {
+  if (keyCode == ENTER) {
+    gameStarted = true;
+  }
+
+  if (!gameStarted && keyCode == 'B') {
+    switchBackground();
+  }
+
+  keys[keyCode] = true;
+}
+
+void keyReleased() {
+  keys[keyCode] = false;
+}
+
+void handlePlayer1Movement() {
+  if (keys['W'] && !player1IsJumping) {
+    player1YSpeed = -15;
+    player1IsJumping = true;
+  }
+
+  if (keys['A']) {
+    player1X -= player1Speed;
+  }
+
+  if (keys['D']) {
+    player1X += player1Speed;
+  }
+}
+
+void handlePlayer2Movement() {
+  if (keys[UP] && !player2IsJumping) {
+    player2YSpeed = -15;
+    player2IsJumping = true;
+  }
+
+  if (keys[LEFT]) {
+    player2X -= player2Speed;
+  }
+
+  if (keys[RIGHT]) {
+    player2X += player2Speed;
+  }
+}
+
+void handlePlayer1Shooting() {
+  if (keys['V'] && canPlayer1Shoot) {
+    PVector bullet = new PVector(player1X + 50, player1Y + 50);
+    player1Bullets.add(bullet);
+    canPlayer1Shoot = false;
+    lastPlayer1ShotTime = millis();
+  }
+
+  if (!canPlayer1Shoot && millis() - lastPlayer1ShotTime > player1ShootDelay) {
+    canPlayer1Shoot = true;
+  }
+
+  for (int i = player1Bullets.size() - 1; i >= 0; i--) {
+    PVector bullet = player1Bullets.get(i);
+    bullet.x += bulletSpeed;
+
+    if (bullet.x > player2X && bullet.x < player2X + 50 && bullet.y > player2Y && bullet.y < player2Y + 100) {
+      player1Bullets.remove(i);
+      player2Health -= 10;
+      if (player2Health <= 0) {
+        gameOver = true;
+      }
+      continue;
+    }
+
+    fill(0, 255, 0);
+    circle(bullet.x, bullet.y, bulletSize);
+
+    if (bullet.x > width) {
+      player1Bullets.remove(i);
+    }
+  }
+}
+
+void handlePlayer2Shooting() {
+  if (keys[SHIFT] && canPlayer2Shoot) {
+    PVector bullet = new PVector(player2X, player2Y + 50);
+    player2Bullets.add(bullet);
+    canPlayer2Shoot = false;
+    lastPlayer2ShotTime = millis();
+  }
+
+  if (!canPlayer2Shoot && millis() - lastPlayer2ShotTime > player2ShootDelay) {
+    canPlayer2Shoot = true;
+  }
+
+  for (int i = player2Bullets.size() - 1; i >= 0; i--) {
+    PVector bullet = player2Bullets.get(i);
+    bullet.x -= bulletSpeed;
+
+    if (bullet.x > player1X && bullet.x < player1X + 50 && bullet.y > player1Y && bullet.y < player1Y + 100) {
+      player2Bullets.remove(i);
+      player1Health -= 10;
+      if (player1Health <= 0) {
+        gameOver = true;
+      }
+      continue;
+    }
+
+    fill(255, 0, 0);
+    circle(bullet.x, bullet.y, bulletSize);
+
+    if (bullet.x < 0) {
+      player2Bullets.remove(i);
+    }
+  }
+}
